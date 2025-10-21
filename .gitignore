@@ -1,0 +1,85 @@
+# ------------------------
+# Python cache and build
+# ------------------------
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+build/
+dist/
+develop-eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.manifest
+*.spec
+
+# ------------------------
+# Virtual environments
+# ------------------------
+env/
+venv/
+ENV/
+.venv/
+.env
+
+# ------------------------
+# Config and credentials
+# ------------------------
+config_local.py
+credentials.json
+
+# ------------------------
+# Logs and temporary files
+# ------------------------
+*.log
+logs/
+temp/
+tmp/
+nohup.out
+
+# ------------------------
+# OS junk
+# ------------------------
+.DS_Store
+Thumbs.db
+
+# ------------------------
+# IDE/editor settings
+# ------------------------
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# ------------------------
+# Data, outputs, and models
+# ------------------------
+data/raw/
+outputs/
+results/
+models/
+checkpoints/
+
+# ------------------------
+# Jupyter notebooks
+# ------------------------
+.ipynb_checkpoints/
+
+# ------------------------
+# Coverage/test files
+# ------------------------
+.pytest_cache/
+.coverage
+coverage.xml
+
+# ------------------------
+# Whisper / audio temp files
+# ------------------------
+*.wav
+*.mp3
+temp_audio/
