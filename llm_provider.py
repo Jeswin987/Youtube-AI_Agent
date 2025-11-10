@@ -98,4 +98,3 @@ class LLMProvider:
         response = requests.post(Config.OLLAMA_URL, json=data)
         response.raise_for_status()
         return response.json()["response"]
-

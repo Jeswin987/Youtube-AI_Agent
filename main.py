@@ -14,7 +14,7 @@ def print_banner():
     print("🎬 YOUTUBE VIDEO ANALYZER - AI Agent")
     print("=" * 80)
     print("\nThis AI agent analyzes YouTube videos and provides:")
-    print("  ✓ Comprehensive summary (length adapts to video duration)")
+    print("  ✓ Comprehensive summary")
     print("  ✓ Key timestamps from throughout the video")
     print("  ✓ Main themes and topics")
     print("  ✓ Structured content breakdown")
