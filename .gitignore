@@ -83,3 +83,5 @@ coverage.xml
 *.wav
 *.mp3
 temp_audio/
+
+.streamlit/secrets.toml
