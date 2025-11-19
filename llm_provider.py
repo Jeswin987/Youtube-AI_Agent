@@ -33,7 +33,7 @@ class LLMProvider:
         if self.provider == "google" and not self.api_key:
             raise ValueError("Google API key is missing. Set it in .env or Config.")
         if self.provider == "groq" and not self.api_key:
-            raise ValueError("Groq API key is missing. Get one at https://console.groq.com")
+            raise ValueError("Groq API key is missing.")
 
         # Initialize Google GenAI if applicable
         if self.provider == "google":

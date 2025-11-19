@@ -7,6 +7,7 @@ import re
 from typing import Dict, List
 from llm_provider import LLMProvider
 from config import Config
+from youtube_service import YouTubeService
 
 
 class VideoAnalyzer:

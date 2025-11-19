@@ -1,12 +1,19 @@
-"""
-YouTube service - handles video data extraction
-"""
+"""YouTube service - handles video data extraction."""
 
+import os
 import re
+from typing import Dict, List, Tuple
+
 import yt_dlp
-from typing import Dict, List
-from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api import (
+    YouTubeTranscriptApi,
+    NoTranscriptFound,
+    TranscriptsDisabled,
+    VideoUnavailable,
+    TooManyRequests,
+)
 from models import VideoMetadata
+from config import Config
 
 
 class YouTubeService:
@@ -33,11 +40,27 @@ class YouTubeService:
         try:
             print("📊 Fetching video metadata...")
             
+            cookie_file, _ = YouTubeService._get_cookie_settings()
             ydl_opts = {
                 'quiet': True,
                 'no_warnings': True,
                 'extract_flat': False,
+                # Anti-bot detection bypass options
+                'extractor_args': {
+                    'youtube': {
+                        'player_client': ['android', 'web'],
+                        'skip': ['dash', 'hls']
+                    }
+                },
+                'http_headers': {
+                    'User-Agent': 'com.google.android.youtube/19.09.37 (Linux; U; Android 11) gzip',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                    'Accept-Language': 'en-us,en;q=0.5',
+                    'Sec-Fetch-Mode': 'navigate',
+                }
             }
+            if cookie_file:
+                ydl_opts['cookiefile'] = cookie_file
             
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(url, download=False)
@@ -66,24 +89,30 @@ class YouTubeService:
     def get_transcript(video_id: str) -> List[Dict]:
         """Fetch video transcript"""
         try:
-            # Create instance and call list with video_id
-            api = YouTubeTranscriptApi()
-            transcript_list = api.list(video_id)
+            # Fetch available transcripts for the video
+            _, cookies = YouTubeService._get_cookie_settings()
+            
+            # Add custom headers to bypass bot detection
+            transcript_list = YouTubeTranscriptApi.list_transcripts(
+                video_id,
+                cookies=cookies,
+            )
             
             # Try to get English transcript
             try:
                 transcript = transcript_list.find_transcript(['en'])
                 data = transcript.fetch()
-            except:
+            except Exception:
                 # Try auto-generated English
                 try:
                     transcript = transcript_list.find_transcript(['en-US'])
                     data = transcript.fetch()
-                except:
-                    # Get first available transcript
-                    for transcript in transcript_list:
-                        data = transcript.fetch()
-                        break
+                except Exception:
+                    # Fallback: use the first available transcript
+                    first_available = next(iter(transcript_list), None)
+                    if not first_available:
+                        raise Exception("No transcripts available for this video")
+                    data = first_available.fetch()
             
             # Convert FetchedTranscriptSnippet objects to dictionaries
             return [
@@ -114,3 +143,37 @@ class YouTubeService:
         mins = int(seconds // 60)
         secs = int(seconds % 60)
         return f"{mins:02d}:{secs:02d}"
+
+    @staticmethod
+    def _get_cookie_settings() -> Tuple[str | None, Dict[str, str] | None]:
+        """Resolve cookie file path and dictionary for authenticated requests."""
+        cookie_path = Config.YOUTUBE_COOKIES_FILE
+        if not cookie_path:
+            return None, None
+
+        expanded_path = os.path.abspath(os.path.expanduser(cookie_path))
+        if not os.path.exists(expanded_path):
+            if Config.DEBUG_MODE:
+                print(f"[DEBUG] Cookie file not found at {expanded_path}; continuing without cookies")
+            return None, None
+
+        cookies: Dict[str, str] = {}
+        try:
+            with open(expanded_path, "r", encoding="utf-8") as cookie_file:
+                for line in cookie_file:
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    parts = line.split("\t")
+                    if len(parts) < 7:
+                        continue
+                    name, value = parts[5], parts[6]
+                    cookies[name] = value
+        except Exception as err:
+            if Config.DEBUG_MODE:
+                print(f"[DEBUG] Failed to load cookies: {err}; continuing without cookies")
+            return None, None
+
+        if Config.DEBUG_MODE:
+            print(f"[DEBUG] Loaded cookies from {expanded_path}")
+        return expanded_path, cookies

@@ -85,7 +85,7 @@ def main():
             print("  • Video is private, age-restricted, or unavailable")
             print("  • Invalid URL format")
             print("  • Network connection issues")
-            print("  • Ollama service not running (if using Ollama)\n")
+            print("\nPlease try again with a different video.\n")
             
             # Ask if user wants to try another URL
             retry = input("🔄 Try another URL? (yes/no): ").strip().lower()

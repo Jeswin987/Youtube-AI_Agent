@@ -32,6 +32,9 @@ class Config:
         999: "500-600",
     }
 
+    # Authentication helpers
+    YOUTUBE_COOKIES_FILE = os.getenv("YOUTUBE_COOKIES_FILE", "").strip()
+
     # Output settings
     SAVE_TO_JSON = True
     JSON_FILENAME_PATTERN = "analysis_{timestamp}.json"
